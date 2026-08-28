@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "existing_public_api_count": 104,
+  "public_api_by_service": {
+    "user-service": 28,
+    "product-service": 25,
+    "trade-service": 51
+  },
+  "existing_business_table_count": 16,
+  "tables_by_service": {
+    "user-service": 4,
+    "product-service": 6,
+    "trade-service": 6
+  },
+  "proposed_internal_api_count": 15,
+  "note": "仅核对静态清单完整性；没有执行 API 测试、DDL 或微服务部署。"
+}

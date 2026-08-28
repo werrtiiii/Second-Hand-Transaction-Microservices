@@ -1,0 +1,4 @@
+# Windows 开发环境检出后，容器初始化脚本仍须使用 LF。
+*.sh text eol=lf
+**/Dockerfile text eol=lf
+*.yml text eol=lf

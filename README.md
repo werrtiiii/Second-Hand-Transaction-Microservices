@@ -1,431 +1,63 @@
-# 🛒 二手交易平台 SecondHand
+# Second-Hand-Transaction Microservices
 
-一个功能完整的校园/社区二手交易平台，前后端分离架构，支持商品买卖、订单管理、售后维权、私聊评价等全流程交易场景。
+从二手交易平台单体代码独立建立的微服务改造仓库。当前是**第一阶段**，不是完整替代原后端的生产版本。
 
----
+## 当前结构
 
-## 📋 功能总览
+- `backend/`、`frontend/`：保留的单体参考代码，根 Maven 构建不包含旧 backend。
+- `services/user-service/`：注册、登录、当前用户、内部身份校验与用户摘要。
+- `services/product-service/`：基础商品发布/查询、库存预占/确认/释放。
+- `services/trade-service/`：原价下单、本人订单查询、取消、持久化库存恢复。
+- `platform/`：通用 HTTP、错误响应和 RSA 凭证验证；不共享业务 Entity 或 Repository。
+- `test-support/`、`tests/system-tests/`：独立 MySQL 测试工具及真实三服务 HTTP 回归。
+- `docs/微服务设计/`：原设计方案；其中标记“目标/拟新增”的内容不代表全部实现。
 
-### 用户端
+改造前版本：标签 `monolith-before-microservices`（原提交 fa88c48）。改造工作分支：`codex/microservices-phase1`。
 
-| 模块 | 功能 |
-|------|------|
-| 🔐 **认证** | 注册、登录、多账号切换、JWT 令牌鉴权，角色分为 `USER` / `ADMIN` |
-| 🏠 **首页** | 商品瀑布流浏览、分类筛选、搜索、排序 |
-| 📦 **商品** | 发布（九成新/轻微使用等成色）、编辑、下架/上架；多图上传 + 图片缩放预览 |
-| 🛒 **订单** | 下单购买、模拟支付、确认收货；卖家发货（支持物流单号） |
-| 💬 **私聊** | 买家卖家实时聊天，消息中心聚合展示 |
-| ⭐ **评价** | 交易完成后双向互评、综合评分展示 |
-| 📝 **评论** | 商品评论区，互动讨论 |
-| ❤️ **收藏** | 收藏感兴趣的商品，统一管理 |
-| 🔄 **售后** | 退货/退款申请、卖家审核、物流退回、平台确认，完整售后流程 |
-| 🚚 **物流** | 快递100 实时轨迹查询（可切换 Mock 模式） |
-| 🚩 **举报** | 举报违规商品，管理员处理 |
-| 👤 **个人中心** | 头像/昵称编辑、收货地址管理（省市区三级联动） |
-| 🌙 **暗色模式** | 亮色/暗色切换，跟随系统偏好 |
-| 🧭 **卖家主页** | 查看卖家所有在售商品和历史 |
+## 本轮范围
 
-### 管理后台 (`/admin`)
+已实现首条业务链：注册登录 → 发布商品 → 创建订单并预占库存 → 取消并释放库存。
 
-| 页面 | 功能 |
-|------|------|
-| 📊 **数据面板** | 用户数、商品数、订单数等核心指标概览 |
-| 👥 **用户管理** | 用户列表、封禁/解封、角色管理 |
-| 📦 **商品管理** | 商品审核、下架/删除违规商品 |
-| 📋 **订单管理** | 所有订单查询、状态跟踪 |
-| 🚩 **举报处理** | 审核举报并处理 |
-| 🔧 **售后处理** | 平台仲裁售后申请 |
+特别验证重复请求、并发抢最后一件、释放先于预占、审核下架保护、服务身份/受众校验、跨库访问被拒绝，以及**商品服务已扣库存但响应丢失，交易服务重启后恢复且不重复扣减**。
 
----
+尚未迁移：支付/退款、发货、售后、议价、收藏评论举报、地址接口、完整消息与 outbox、管理后台、前端路由适配、生产 Kubernetes 部署和回滚。当前不应将原前端直接切换到这些服务。
 
-## 🏗️ 技术栈
+## 构建和测试
 
-### 后端
-
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Java | 17+ | 运行环境 |
-| Spring Boot | 3.3.2 | 核心框架 |
-| Spring Security | — | 认证授权 |
-| Spring Data JPA | — | 数据访问层 |
-| MySQL | 8.0 | 关系数据库 |
-| H2 | — | 测试数据库 |
-| JWT (jjwt) | 0.12.6 | 无状态认证 |
-| SpringDoc OpenAPI | 2.6.0 | Swagger 接口文档 |
-| Maven Wrapper | — | 无需手动安装 Maven |
-
-### 前端
-
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Vue 3 | 3.5 | 渐进式框架 |
-| Vite | 8.0 | 构建工具 |
-| Vue Router | 4.6 | SPA 路由 |
-| Pinia | 3.0 | 状态管理 |
-| Vitest | 4.1 | 单元测试 |
-| 原生 CSS | — | 暗色模式 / 响应式 / 骨架屏 |
-
----
-
-## 🚀 快速启动
-
-### 推荐：使用 Docker Compose 换机启动
-
-新机器只需要安装以下软件，无需单独安装 JDK、Node.js 或 MySQL：
-
-- Git
-- Docker Desktop（Windows/macOS）或 Docker Engine（Linux）
-- Docker Compose v2（执行 `docker compose version` 可以检查）
-
-克隆并启动：
-
-```bash
-git clone https://github.com/Suzchg/Second-Hand-Transaction.git
-cd Second-Hand-Transaction
-cp .env.example .env
-docker compose up --build -d
-docker compose ps
-```
-
-Windows PowerShell 使用：
+需要 Java 17+、Maven 3.9+、可访问的 Docker。测试使用临时 MySQL 容器，不连接现有开发/生产数据库。
 
 ```powershell
-git clone https://github.com/Suzchg/Second-Hand-Transaction.git
-Set-Location Second-Hand-Transaction
-Copy-Item .env.example .env
-docker compose up --build -d
-docker compose ps
+mvn --batch-mode --no-transfer-progress clean verify
+python scripts/summarize_microservice_tests.py
 ```
 
-启动成功后访问：
-
-| 服务 | 地址 |
-|------|------|
-| 前端 | http://localhost:8080 |
-| 后端健康状态 | http://localhost:8088/actuator/health/readiness |
-| 后端 API | http://localhost:8088/api |
-| MySQL | localhost:3306 |
-
-首次启动时，MySQL 会执行 `db/init.sql` 创建表并导入项目测试数据。数据保存在 Docker Volume 中，重新构建镜像不会清空数据库和上传文件。
-
-停止服务：
-
-```bash
-docker compose down
-```
-
-仅在确定要删除全部数据库和上传数据时使用：
-
-```bash
-docker compose down --volumes
-```
-
-可通过 `.env` 修改密码和映射端口。正式环境不要使用 `.env.example` 中的示例密码。
-
-### 一键启动（Windows）
+单独构建/测试某个服务（同时构建通用依赖，不编译其他业务服务）：
 
 ```powershell
-.\start.ps1
+mvn -pl services/product-service -am clean verify
 ```
 
-### 手动启动
-
-#### 1. 环境准备
-
-- **JDK 17+** → `java -version`
-- **Node.js 18+** → `node -v`
-- **MySQL 8.0** → `mysql -u root -p`
-
-#### 2. 创建数据库
-
-```sql
-CREATE DATABASE IF NOT EXISTS secondhand DEFAULT CHARACTER SET utf8mb4;
-```
-
-#### 3. 修改配置
-
-编辑 `backend/src/main/resources/application.yml`，将数据库密码改为你的 MySQL root 密码：
-
-```yaml
-spring:
-  datasource:
-    username: root
-    password: 你的密码
-```
-
-#### 4. 安装前端依赖
-
-```bash
-cd frontend
-npm install
-```
-
-#### 5. 启动后端
-
-```bash
-cd backend
-./mvnw.cmd -DskipTests spring-boot:run
-# 看到 "Started App in x.xxx seconds" 即启动成功
-```
-
-#### 6. 启动前端
-
-```bash
-cd frontend
-npm run dev
-# 看到 "Local: http://localhost:5173/" 即启动成功
-```
-
----
-
-## 🌐 访问地址
-
-| 服务 | 地址 | 说明 |
-|------|------|------|
-| 🖥️ 前端页面 | http://localhost:5173 | 浏览器访问 |
-| 🔌 后端 API | http://localhost:8088 | RESTful 接口 |
-| 📖 Swagger 文档 | http://localhost:8088/swagger | 在线接口调试 |
-| 🗄️ MySQL | localhost:3306 | 数据库连接 |
-
-### 默认管理员
-
-| 账号 | 密码 |
-|------|------|
-| `admin` | `admin123` |
-
-管理员入口：http://localhost:5173/admin
-
----
-
-## 📁 项目结构
-
-```
-Second-hand Transaction/
-│
-├── start.ps1                         # 一键启动脚本（自动检查 MySQL、设置 JDK）
-├── stop.ps1                          # 停止脚本
-├── guide.md                          # 新人上手指南（含常见问题）
-│
-├── backend/                          # Spring Boot 后端
-│   ├── pom.xml                       # Maven 依赖配置
-│   ├── mvnw.cmd / mvnw               # Maven Wrapper（无需安装 Maven）
-│   ├── sql/                          # 数据库补丁脚本
-│   │   └── after_sale_v2.sql
-│   └── src/main/java/com/secondhand/
-│       ├── App.java                  # 启动入口
-│       ├── common/
-│       │   └── ratelimit/            # 接口限流（滑动窗口计数，IP 级别）
-│       ├── config/                   # Spring 全局配置（CORS、静态资源、拦截器）
-│       ├── auth/                     # 🔐 认证模块（注册/登录/切换账号/JWT）
-│       ├── user/                     # 👤 用户模块（资料/地址/省市区）
-│       ├── product/                  # 📦 商品模块
-│       │   ├── category/             #    - 分类管理
-│       │   └── image/                #    - 图片上传（本地存储 + CDN 可选）
-│       ├── order/                    # 🛒 订单模块（创建/支付/发货/收货/退款）
-│       ├── offer/                    # 💰 报价/出价模块
-│       ├── aftersale/                # 🔄 售后模块（退货/退款/物流退回）
-│       ├── chat/                     # 💬 私聊模块 + 消息中心
-│       ├── comment/                  # 📝 评论模块
-│       ├── favorite/                 # ❤️ 收藏模块
-│       ├── report/                   # 🚩 举报模块
-│       ├── rating/                   # ⭐ 评分模块
-│       ├── logistics/                # 🚚 物流模块
-│       │   └── provider/             #    - Mock 物流 / 快递100 API
-│       └── admin/                    # 🛡️ 管理后台模块
-│       └── src/test/                 # 测试代码
-│
-├── frontend/                         # Vue 3 前端
-│   ├── package.json                  # npm 依赖
-│   ├── vite.config.js                # Vite 配置（API 代理）
-│   ├── vitest.config.js              # 测试配置
-│   ├── index.html
-│   └── src/
-│       ├── main.js                   # 入口：挂载 Pinia、Router、全局组件/指令
-│       ├── App.vue                   # 根布局（导航栏 + 路由出口）
-│       ├── api.js                    # HTTP 请求封装（自动附加 Token、统一错误处理）
-│       ├── router.js                 # 路由表 + 导航守卫（登录/管理员权限校验）
-│       ├── style.css                 # 全局样式 + CSS 变量（亮色主题）
-│       ├── dark.css                  # 暗色主题变量覆写
-│       ├── lazyBg.js                 # 图片懒加载自定义指令
-│       ├── toast.js                  # Toast 消息提示工具
-│       ├── stores/                   # Pinia 状态管理
-│       │   ├── user.js               #    - 用户认证（多账号切换、头像同步）
-│       │   ├── theme.js              #    - 主题切换（亮/暗、跟随系统）
-│       │   └── notification.js       #    - 通知轮询（未读消息、待处理订单）
-│       ├── components/               # 通用组件
-│       │   ├── AppIcon.vue           #    - 应用图标
-│       │   ├── CategoryNav.vue       #    - 分类导航
-│       │   ├── ImageUploader.vue     #    - 多图上传
-│       │   ├── ImageGallery.vue      #    - 图片预览（支持缩放）
-│       │   ├── AddressPicker.vue     #    - 地址选择器
-│       │   ├── RegionCascader.vue    #    - 省市区三级联动
-│       │   ├── Skeleton.vue          #    - 骨架屏加载占位
-│       │   └── Toast.vue             #    - 全局消息提示
-│       ├── views/                    # 页面组件
-│       │   ├── Home.vue              #    - 首页
-│       │   ├── Login.vue             #    - 登录/注册
-│       │   ├── ProductDetail.vue     #    - 商品详情
-│       │   ├── Sell.vue              #    - 发布/编辑商品
-│       │   ├── Order.vue             #    - 订单详情
-│       │   ├── Messages.vue          #    - 消息列表
-│       │   ├── MyProducts.vue        #    - 我的商品
-│       │   ├── MyOrders.vue          #    - 我的订单
-│       │   ├── MyFavorites.vue       #    - 我的收藏
-│       │   ├── MyAfterSales.vue      #    - 我的售后
-│       │   ├── Profile.vue           #    - 个人信息
-│       │   ├── AddressForm.vue       #    - 地址表单
-│       │   ├── SellerProducts.vue    #    - 卖家主页
-│       │   ├── SwitchAccount.vue     #    - 切换账号
-│       │   ├── AfterSalePolicy.vue   #    - 售后政策
-│       │   ├── PrivacyPolicy.vue     #    - 隐私政策
-│       │   └── admin/                # 管理后台
-│       │       ├── AdminLayout.vue   #    - 后台布局（侧边栏）
-│       │       ├── AdminDashboard.vue#    - 数据面板
-│       │       ├── AdminUsers.vue    #    - 用户管理
-│       │       ├── AdminProducts.vue #    - 商品管理
-│       │       ├── AdminOrders.vue   #    - 订单管理
-│       │       ├── AdminReports.vue  #    - 举报处理
-│       │       └── AdminAfterSale.vue#    - 售后处理
-│       └── __tests__/                # 前端测试
-│
-├── scripts/                          # 辅助脚本
-│   ├── expand-regions.js             # 省市区数据展开
-│   ├── generate_report.py            # 测试报告生成
-│   └── fix_design_doc.py             # 设计文档修正
-│
-└── 售后功能测试报告.md                  # 售后功能测试报告
-```
-
----
-
-## 🔧 核心架构
-
-### 后端
-
-- **分层架构**：Controller → Service → Repository → Entity，按功能模块分包
-- **认证**：Spring Security + JWT 无状态认证，支持多身份（用户名/手机号/邮箱）
-- **限流**：基于 IP 的滑动窗口计数（`@RateLimit` 注解），防刷保护
-- **物流**：策略模式，Mock 模拟 / 快递100 真实 API 可切换
-- **统一响应**：`{ success, data, error }` 格式，全局异常处理
-- **数据库**：JPA 自动建表（`ddl-auto: update`），ID 使用自增主键
-
-### 前端
-
-- **状态管理**：Pinia Store 集中管理用户、主题、通知状态
-- **路由守卫**：未登录跳转登录页，非管理员拒绝访问 `/admin`
-- **暗色模式**：CSS 变量 + `data-theme` 属性切换，支持跟随系统
-- **图片优化**：懒加载指令、压缩上传、图片缩放预览
-- **骨架屏**：加载时显示占位骨架，提升感知性能
-- **响应式**：适配手机/平板/桌面端
-
----
-
-## 📡 API 规范
-
-### 统一响应格式
-
-```json
-// 成功
-{ "success": true, "data": { ... } }
-
-// 失败
-{ "success": false, "error": { "code": "...", "message": "..." } }
-```
-
-### 认证方式
-
-所有需要登录的接口在请求头携带：
-
-```
-Authorization: Bearer <accessToken>
-```
-
-### 接口文档
-
-启动后端后访问 Swagger UI：http://localhost:8088/swagger
-
----
-
-## ⚙️ 配置说明
-
-编辑 `backend/src/main/resources/application.yml`：
-
-```yaml
-server:
-  port: 8088                         # 后端端口
-
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/secondhand?...
-    username: root                    # 数据库用户名
-    password: 123000                  # 数据库密码
-
-app:
-  cdn-base-url:                      # CDN 前缀（留空使用本地路径）
-  security:
-    jwt:
-      secret: ...                    # JWT 签名密钥（生产环境务必修改）
-      access-token-expiration-minutes: 120
-
-logistics:
-  kuaidi100:
-    enabled: false                   # 是否启用快递100真实 API
-    customer: ""                     # 快递100 customer ID
-    key: ""                          # 快递100 授权码
-```
-
----
-
-## 🧪 测试
-
-```bash
-# 后端测试
-cd backend
-./mvnw.cmd clean verify
-python ../scripts/summarize_tests.py
-
-# 前端测试
-cd frontend
-npm test
-```
-
-`mvn clean verify` 会执行：
-
-1. Surefire：既有单元测试，以及随机端口真实 HTTP 的后端 E2E 测试；
-2. Failsafe：7 大业务场景的集成/API 测试（`*IT`），使用完整 Spring Security → Controller → Service → JPA → MySQL 链路；
-3. 对 HTTP 状态、响应业务字段、数据库提交结果、异常后的回滚和通知进行断言。
-
-MySQL 8.0 由 Testcontainers 自动创建并清理，使用随机端口，不依赖本机 3306 或开发数据库。
-测试不替换 Controller、Service 或 Repository；物流使用项目现有 Mock 实现，未接入真实支付/快递服务。
-
-仅运行集成/API 测试（不重复运行单元和 E2E）：
+可运行 JAR 为各服务 `target/*-exec.jar`；不带 exec 的 JAR 只用于测试组合。完整构建后可生成本地开发凭证：
 
 ```powershell
-cd backend
-.\mvnw.cmd test-compile failsafe:integration-test failsafe:verify
+java -cp platform/target/classes com.secondhand.micro.platform.GenerateDevEnvironment
+docker compose -f compose.microservices.yml up --build
 ```
 
-报告见 [集成/API 测试用例与报告](集成API测试用例与报告.md)。
-XML 原始结果在 `backend/target/surefire-reports/`、`backend/target/failsafe-reports/`；
-完整验证后运行汇总脚本可生成 `backend/target/test-report.md`，包含总数、通过数、失败原因、环境及参数化用例明细。
-汇总脚本遇到缺少必测类、失败、执行错误或跳过时返回非零退出码；单独运行某一类测试后不应将其输出当作完整报告。
+服务端口仅绑定本机：用户 18081、商品 18082、交易 18083。健康与就绪检查为 `/actuator/health/liveness` 和 `/actuator/health/readiness`。
 
-运行集成和 E2E 测试需要本机 Docker 正在运行。GitHub CI/CD 会自动执行完整验证并保留测试报告（失败时也上传）；测试失败时不会继续构建、发布或部署生产镜像。
+数据库初始化仅针对该 Compose 项目的新数据卷，未提供已有数据库的自动升级。不要把根目录旧 `docker-compose.yml`、旧 `k8s/` 和旧 `scripts/deploy.sh` 用于微服务部署；它们只是单体参考。
 
-Kubernetes 手动部署和健康检查脚本：
+## 安全与数据边界
 
-```bash
-IMAGE_ROOT=ghcr.io/<owner>/<repository> \
-IMAGE_TAG=<git-commit-sha> \
-bash scripts/deploy.sh
+- 三个数据库分别是 secondhand_user、secondhand_product、secondhand_trade；各服务运行账号只有本库 DML 权限，建表由初始化流程完成。
+- 每个服务只持有自己的 RSA 私钥，接收方持有受信公钥。内部 JWT 限定签发者、目标服务、类型和到期时间；控制器再次校验允许调用的服务。
+- 本地 Compose 不提供公网入口。生产必须增加 TLS、NetworkPolicy、凭证轮换和专用内部网络，当前 Compose 不构成生产安全方案。
+- `.env` 包含私钥和数据库密码，已被 Git 忽略；生成工具拒绝覆盖。示例文件不包含可用凭证。
+- 库存恢复任务持久化并使用固定业务操作号；当前采用固定间隔重试，指数退避、任务租约和人工告警面板仍是下一阶段工作。
+- 旧的 CI/CD 已改为 `.disabled` 文件；新增 CI 只验证测试和构建镜像，不发布、不部署到原项目环境。
 
-bash scripts/health-check.sh
-```
+## 证据与进度
 
-健康检查会通过 Kubernetes 端口转发实际访问前端首页和 `/api/categories`。任一请求失败时脚本返回非零状态，CD 流水线随即失败。
-
----
-
-## 📄 许可
-
-MIT License
+测试报告：`reports/phase1-test-report.md`（运行汇总命令生成）；原始 XML 位于各模块 target/failsafe-reports。
+详细范围、已知限制与下一步见 [第一阶段改造记录](docs/第一阶段改造记录.md)。

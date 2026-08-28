@@ -1,0 +1,45 @@
+name: Microservices CI
+on:
+  push:
+    branches: [master, "codex/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: 三服务 API 与跨服务 MySQL 回归
+        run: mvn --batch-mode --no-transfer-progress clean verify
+      - name: 汇总结果并检查必需模块
+        if: always()
+        run: python3 scripts/summarize_microservice_tests.py
+      - name: 保存原始报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: microservices-phase1-test-reports
+          path: |
+            services/*/target/failsafe-reports/
+            tests/system-tests/target/failsafe-reports/
+            reports/phase1-test-report.md
+  images:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [user, product, trade]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: services/${{ matrix.service }}-service/Dockerfile
+          push: false

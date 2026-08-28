@@ -1,0 +1,15 @@
+flowchart TB
+    F[前端 Web 与管理页面] --> G[统一入口：Nginx / API 路由]
+    G --> U[用户服务 user-service]
+    G --> P[商品服务 product-service]
+    G --> T[交易服务 trade-service]
+    U --> UD[(secondhand_user)]
+    P --> PD[(secondhand_product)]
+    T --> TD[(secondhand_trade)]
+    T -. 商品快照与库存预占确认释放 .-> P
+    T -. 身份地址查询与交易通知 .-> U
+    P -. 用户摘要查询与商品通知 .-> U
+    U -. 商品摘要与管理统计查询 .-> P
+    U -. 评分待办与管理统计查询 .-> T
+    U --> UF[头像文件：用户服务独占写入]
+    P --> PF[商品图片：商品服务独占写入]

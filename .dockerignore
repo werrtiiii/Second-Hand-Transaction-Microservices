@@ -1,0 +1,10 @@
+.git
+**/target
+**/node_modules
+.env
+.env.*
+!.env.example
+backend
+frontend
+docs
+部署交付材料_*
