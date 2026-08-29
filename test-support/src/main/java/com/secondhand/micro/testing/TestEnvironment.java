@@ -38,6 +38,14 @@ public class TestEnvironment implements AutoCloseable {
   properties.put("app.service-name",service+"-service");properties.put("app.private-key",privateKey(service));
   for(String name:keys.keySet())properties.put("app."+name+"-public-key",publicKey(name));
   properties.put("app.user-url","http://127.0.0.1:1");properties.put("app.product-url","http://127.0.0.1:1");
+  properties.put("app.upload-dir",java.nio.file.Path.of("target","test-uploads",service).toAbsolutePath().toString());
+  properties.put("app.outbox-enabled",String.valueOf(!service.equals("user")));
+  properties.put("app.mock-payments-enabled","true");
+  properties.put("app.rate-limit-enabled","false");
+  properties.put("management.info.env.enabled","true");
+  properties.put("app.outbox-delay-ms","600000");
+  properties.put("app.maintenance-delay-ms","600000");
+  properties.put("app.trade-url","http://127.0.0.1:1");
   properties.put("app.recovery-delay-ms","600000");properties.put("spring.main.banner-mode","off");
   properties.putAll(extra);
   var context=(ServletWebServerApplicationContext)new SpringApplication(main).run(properties.entrySet().stream().map(e->"--"+e.getKey()+"="+e.getValue()).toArray(String[]::new));

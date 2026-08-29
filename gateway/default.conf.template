@@ -1,0 +1,119 @@
+map $uri $service_upstream {
+    default "";
+    ~^/api/admin/after-sale/process-timeouts$ trade-service:8080;
+    ~^/api/after-sale/process-timeouts$ trade-service:8080;
+    ~^/api/orders/process-settlements$ trade-service:8080;
+    ~^/api/after-sale/my-received$ trade-service:8080;
+    ~^/api/after-sale/my-requests$ trade-service:8080;
+    ~^/api/auth/password/change$ user-service:8080;
+    ~^/api/users/notifications$ user-service:8080;
+    ~^/api/admin/users/online$ user-service:8080;
+    ~^/api/messages/comments$ user-service:8080;
+    ~^/api/admin/after-sale$ trade-service:8080;
+    ~^/api/users/addresses$ user-service:8080;
+    ~^/api/admin/dashboard$ user-service:8080;
+    ~^/api/messages/system$ user-service:8080;
+    ~^/api/users/favorites$ product-service:8080;
+    ~^/api/auth/heartbeat$ user-service:8080;
+    ~^/api/users/messages$ user-service:8080;
+    ~^/api/admin/products$ product-service:8080;
+    ~^/api/after-sale/all$ trade-service:8080;
+    ~^/api/auth/register$ user-service:8080;
+    ~^/api/messages/read$ user-service:8080;
+    ~^/api/users/profile$ user-service:8080;
+    ~^/api/admin/reports$ product-service:8080;
+    ~^/api/seller-offers$ trade-service:8080;
+    ~^/api/orders/bought$ trade-service:8080;
+    ~^/api/users/avatar$ user-service:8080;
+    ~^/api/admin/orders$ trade-service:8080;
+    ~^/api/admin/users$ user-service:8080;
+    ~^/api/my-products$ product-service:8080;
+    ~^/api/orders/sold$ trade-service:8080;
+    ~^/api/auth/login$ user-service:8080;
+    ~^/api/categories$ product-service:8080;
+    ~^/api/after-sale$ trade-service:8080;
+    ~^/api/my-offers$ trade-service:8080;
+    ~^/api/products$ product-service:8080;
+    ~^/api/payments$ trade-service:8080;
+    ~^/api/auth/me$ user-service:8080;
+    ~^/api/regions$ user-service:8080;
+    ~^/api/orders$ trade-service:8080;
+    ~^/api/products/[^/]+/favorite/status$ product-service:8080;
+    ~^/api/admin/after-sale/[^/]+/arbitrate$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/seller-evidence$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/buyer-evidence$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/confirm-return$ trade-service:8080;
+    ~^/api/admin/products/[^/]+/off-shelf$ product-service:8080;
+    ~^/api/products/[^/]+/comments$ product-service:8080;
+    ~^/api/products/[^/]+/favorite$ product-service:8080;
+    ~^/api/after-sale/by-order/[^/]+$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/reject-return$ trade-service:8080;
+    ~^/api/payments/[^/]+/mock-pay$ trade-service:8080;
+    ~^/api/users/addresses/[^/]+/default$ user-service:8080;
+    ~^/api/admin/products/[^/]+/on-shelf$ product-service:8080;
+    ~^/api/products/[^/]+/images$ product-service:8080;
+    ~^/api/products/[^/]+/report$ product-service:8080;
+    ~^/api/admin/orders/[^/]+/mark-paid$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/return-ship$ trade-service:8080;
+    ~^/api/products/[^/]+/offers$ trade-service:8080;
+    ~^/api/admin/reports/[^/]+/dismiss$ product-service:8080;
+    ~^/api/products/[^/]+/chat$ user-service:8080;
+    ~^/api/admin/reports/[^/]+/handle$ product-service:8080;
+    ~^/api/users/[^/]+/products$ product-service:8080;
+    ~^/api/after-sale/[^/]+/arbitrate$ trade-service:8080;
+    ~^/api/shipments/[^/]+/track$ trade-service:8080;
+    ~^/api/admin/users/[^/]+/disable$ user-service:8080;
+    ~^/api/admin/orders/[^/]+/cancel$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/escalate$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/approve$ trade-service:8080;
+    ~^/api/orders/[^/]+/rating$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/cancel$ trade-service:8080;
+    ~^/api/after-sale/[^/]+/reject$ trade-service:8080;
+    ~^/api/admin/users/[^/]+/kick$ user-service:8080;
+    ~^/api/admin/after-sale/[^/]+$ trade-service:8080;
+    ~^/api/orders/[^/]+/mark-paid$ trade-service:8080;
+    ~^/api/users/[^/]+/rating$ trade-service:8080;
+    ~^/api/orders/[^/]+/rate$ trade-service:8080;
+    ~^/api/users/[^/]+/sold$ trade-service:8080;
+    ~^/api/users/addresses/[^/]+$ user-service:8080;
+    ~^/api/orders/[^/]+/receiver$ trade-service:8080;
+    ~^/api/payments/[^/]+$ trade-service:8080;
+    ~^/api/admin/products/[^/]+$ product-service:8080;
+    ~^/api/orders/[^/]+/confirm$ trade-service:8080;
+    ~^/api/offers/[^/]+/accept$ trade-service:8080;
+    ~^/api/offers/[^/]+/cancel$ trade-service:8080;
+    ~^/api/offers/[^/]+/reject$ trade-service:8080;
+    ~^/api/orders/[^/]+/cancel$ trade-service:8080;
+    ~^/api/users/[^/]+/public$ user-service:8080;
+    ~^/api/admin/orders/[^/]+$ trade-service:8080;
+    ~^/api/admin/users/[^/]+$ user-service:8080;
+    ~^/api/orders/[^/]+/ship$ trade-service:8080;
+    ~^/api/after-sale/[^/]+$ trade-service:8080;
+    ~^/api/orders/[^/]+/pay$ trade-service:8080;
+    ~^/api/products/[^/]+$ product-service:8080;
+    ~^/api/orders/[^/]+$ trade-service:8080;
+    ~^/api/products/[^/]+/images/[^/]+/cover$ product-service:8080;
+    ~^/api/products/[^/]+/images/[^/]+$ product-service:8080;
+}
+server {
+    listen 8080;
+    server_tokens off;
+    root /usr/share/nginx/html;
+    resolver ${DNS_RESOLVER} valid=10s ipv6=off;
+    client_max_body_size 9m;
+    location = /healthz { access_log off; return 200 'ok'; }
+    location /internal/ { return 404; }
+    location /actuator/ { return 404; }
+    location /api/ {
+        if ($service_upstream = "") { return 404; }
+        proxy_pass http://$service_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 30s;
+    }
+    location /uploads/avatars/ { set $uploads_user user-service:8080; proxy_pass http://$uploads_user; }
+    location /uploads/products/ { set $uploads_product product-service:8080; proxy_pass http://$uploads_product; }
+    location / { try_files $uri $uri/ /index.html; }
+}

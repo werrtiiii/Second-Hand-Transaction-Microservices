@@ -15,10 +15,14 @@ CREATE USER 'trade_app'@'%' IDENTIFIED BY '$TRADE_DB_PASSWORD';
 GRANT SELECT,INSERT,UPDATE,DELETE ON secondhand_user.* TO 'user_app'@'%';
 GRANT SELECT,INSERT,UPDATE,DELETE ON secondhand_product.* TO 'product_app'@'%';
 GRANT SELECT,INSERT,UPDATE,DELETE ON secondhand_trade.* TO 'trade_app'@'%';
-USE secondhand_user;
-SOURCE /schemas/user.sql;
-USE secondhand_product;
-SOURCE /schemas/product.sql;
-USE secondhand_trade;
-SOURCE /schemas/trade.sql;
 SQL
+# 初始化使用临时 socket；运行期升级使用独立 DDL 账号的 TCP 连接。
+for service in user product trade; do
+  database="secondhand_$service"
+  mysql --protocol=socket -uroot "$database" -e 'CREATE TABLE schema_history(version VARCHAR(100) PRIMARY KEY, checksum CHAR(64) NOT NULL, applied_at DATETIME NOT NULL)'
+  for file in /schemas/"$service"/V*.sql; do
+    mysql --protocol=socket -uroot "$database" < "$file"
+    version="$(basename "$file")"; checksum="$(tr -d '\r' < "$file" | sha256sum | cut -d' ' -f1)"
+    mysql --protocol=socket -uroot "$database" -e "INSERT INTO schema_history VALUES('$version','$checksum',NOW())"
+  done
+done

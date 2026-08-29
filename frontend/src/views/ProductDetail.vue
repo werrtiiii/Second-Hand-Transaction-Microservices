@@ -151,7 +151,10 @@ async function submitReport() {
 
 function buy() { showAddressPicker.value = true }
 
+let buying = false
 async function onAddress(addr) {
+  if (buying) return
+  buying = true
   showAddressPicker.value = false
   try {
     const order = await api('/api/orders', {
@@ -166,7 +169,7 @@ async function onAddress(addr) {
     router.push(`/orders/${order.id}`)
   } catch (e) {
     alert(e.message || '下单失败')
-  }
+  } finally { buying = false }
 }
 
 function openOffer() {

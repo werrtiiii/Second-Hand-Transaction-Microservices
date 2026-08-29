@@ -80,3 +80,15 @@ describe('api 请求封装', () => {
     expect(opts.body).toBe(form)
   })
 })
+
+describe('微服务下单幂等键', () => {
+  it('网络结果未知时重试复用同一个键', async () => {
+    const fetchFn = vi.fn().mockRejectedValueOnce(new Error('network')).mockResolvedValue({ok:true,status:200,json:async()=>({success:true,data:{id:1}})})
+    vi.stubGlobal('fetch', fetchFn)
+    const body = {productId: 987654321}
+    await expect(api('/api/orders', {method:'POST',body})).rejects.toThrow('network')
+    await api('/api/orders', {method:'POST',body})
+    expect(fetchFn.mock.calls[0][1].headers['Idempotency-Key']).toBeTruthy()
+    expect(fetchFn.mock.calls[1][1].headers['Idempotency-Key']).toBe(fetchFn.mock.calls[0][1].headers['Idempotency-Key'])
+  })
+})

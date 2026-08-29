@@ -1,0 +1,1 @@
+ALTER TABLE trade_operations ADD COLUMN next_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ADD COLUMN lease_until DATETIME, ADD COLUMN lease_owner VARCHAR(64), ADD KEY ix_recovery(phase,next_attempt_at);

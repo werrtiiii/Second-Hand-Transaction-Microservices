@@ -55,3 +55,7 @@ CREATE TABLE `chat_messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE user_security_state(user_id BIGINT PRIMARY KEY, token_version BIGINT NOT NULL DEFAULT 0);
+
+CREATE TABLE notifications(id VARCHAR(140) PRIMARY KEY,source_service VARCHAR(32) NOT NULL,recipient_id BIGINT NOT NULL,kind VARCHAR(32) NOT NULL,payload JSON NOT NULL,created_at DATETIME NOT NULL,KEY ix_recipient(recipient_id,kind,created_at));
+
+ALTER TABLE user_security_state ADD COLUMN last_seen_at DATETIME;

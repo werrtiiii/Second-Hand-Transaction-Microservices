@@ -6,8 +6,9 @@
  */
 
 const BASE = ''
+const pendingOrders = new Map() // 仅保留结果未知的下单键，避免网络重试重复下单
 
-export async function api(path, { method = 'GET', body, auth = true, raw = false } = {}) {
+export async function api(path, { method = 'GET', body, auth = true, raw = false, idempotencyKey } = {}) {
   const headers = {}
 
   // raw body (e.g. FormData) — don't set Content-Type
@@ -22,11 +23,20 @@ export async function api(path, { method = 'GET', body, auth = true, raw = false
     }
   }
 
+  const orderFingerprint = method === 'POST' && path === '/api/orders'
+    ? `${localStorage.getItem('userId') || ''}:${JSON.stringify(body)}` : null
+  if (orderFingerprint) {
+    if (!pendingOrders.has(orderFingerprint)) pendingOrders.set(orderFingerprint, idempotencyKey || crypto.randomUUID())
+    headers['Idempotency-Key'] = idempotencyKey || pendingOrders.get(orderFingerprint)
+  }
+
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers,
     body: raw ? body : (body ? JSON.stringify(body) : undefined),
   })
+
+  if (orderFingerprint && res.status !== 202 && res.status < 500) pendingOrders.delete(orderFingerprint)
 
   // 解析响应体
   let json

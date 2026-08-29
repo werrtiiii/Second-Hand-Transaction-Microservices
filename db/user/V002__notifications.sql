@@ -1,0 +1,1 @@
+CREATE TABLE notifications(id VARCHAR(140) PRIMARY KEY,source_service VARCHAR(32) NOT NULL,recipient_id BIGINT NOT NULL,kind VARCHAR(32) NOT NULL,payload JSON NOT NULL,created_at DATETIME NOT NULL,KEY ix_recipient(recipient_id,kind,created_at));

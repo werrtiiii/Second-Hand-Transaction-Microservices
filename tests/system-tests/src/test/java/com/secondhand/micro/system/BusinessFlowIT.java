@@ -32,7 +32,7 @@ class BusinessFlowIT {
  @Test void foreignBuyerCannotReadOrCancelOrder(){
   String seller=register(),buyer=register(),stranger=register();long pid=publish(seller,1);
   long id=Http.call(trade,"POST","/api/orders",order(pid),buyer,"ownership-"+pid).data().path("id").asLong();
-  assertEquals(404,Http.call(trade,"GET","/api/orders/"+id,null,stranger,null).status());
+  assertEquals(403,Http.call(trade,"GET","/api/orders/"+id,null,stranger,null).status());
   assertEquals(404,Http.call(trade,"POST","/api/orders/"+id+"/cancel",Map.of(),stranger,null).status());assertEquals(0,quantity(pid));
  }
  @Test void lostReplyIsRecoveredAfterTradeServiceRestart(){
@@ -46,7 +46,7 @@ class BusinessFlowIT {
   org.awaitility.Awaitility.await().atMost(java.time.Duration.ofSeconds(5)).untilAsserted(()->{
    tradeContext.getBean(TradeStore.class).recover();
    var result=Http.call(trade,"GET","/api/orders/"+id,null,buyer,null);
-   assertEquals("WAIT_PAY",result.data().path("status").asText());assertEquals("CONFIRMED",result.data().path("inventoryPhase").asText());assertEquals(1,quantity(pid));
+   assertEquals("WAIT_PAY",result.data().path("order").path("status").asText());assertEquals("CONFIRMED",env.db("trade").queryForObject("SELECT phase FROM trade_operations WHERE order_id=?",String.class,id));assertEquals(1,quantity(pid));
   });
  }
  @Test void databaseAccountsCannotReadOrWriteOtherServices(){
@@ -63,6 +63,28 @@ class BusinessFlowIT {
   for(String endpoint:List.of(user,product,trade)){
    var result=Http.call(endpoint,"GET","/actuator/health/readiness",null,null,null);
    assertEquals(200,result.status());assertEquals("UP",result.body().path("status").asText());
+  }
+ }
+ @Test void notificationLostReplyRetriesAfterSenderRecreationWithoutDuplicates()throws Exception{
+  // 模拟真正接收成功后网络断开；所有发送状态与去重标识都持久化在所属库。
+  long recipient=Http.call(user,"POST","/api/auth/register",Map.of("identityType","EMAIL","identifier",UUID.randomUUID()+"@example.com","password","password123"),null,null).data().path("userId").asLong();
+  var db=env.db("trade");var json=tradeContext.getBean(com.fasterxml.jackson.databind.ObjectMapper.class);
+  var remote=tradeContext.getBean(com.secondhand.micro.platform.Remote.class);
+  try(var loss=new ResponseLossProxy(user)){
+   loss.dropNotificationReplies=true;
+   var first=new com.secondhand.micro.platform.Outbox(db,json,remote,loss.url());
+   first.enqueue(recipient,"system",Map.of("content","可靠通知测试"));
+   String event=db.queryForObject("SELECT id FROM outbox_events WHERE recipient_id=?",String.class,recipient);
+   first.deliver();
+   assertEquals(1,db.queryForObject("SELECT attempts FROM outbox_events WHERE id=?",Integer.class,event));
+   assertNull(db.queryForObject("SELECT published_at FROM outbox_events WHERE id=?",java.sql.Timestamp.class,event));
+   assertEquals(1,env.db("user").queryForObject("SELECT COUNT(*) FROM notifications WHERE id=?",Integer.class,"trade-service:"+event));
+   assertTrue(db.queryForObject("SELECT next_attempt_at>NOW() FROM outbox_events WHERE id=?",Boolean.class,event));
+   // 测试推进持久化重试时间，不在用例中等待真实退避窗口。
+   db.update("UPDATE outbox_events SET next_attempt_at=NOW() WHERE id=?",event);loss.dropNotificationReplies=false;
+   new com.secondhand.micro.platform.Outbox(db,json,remote,loss.url()).deliver();
+   assertNotNull(db.queryForObject("SELECT published_at FROM outbox_events WHERE id=?",java.sql.Timestamp.class,event));
+   assertEquals(1,env.db("user").queryForObject("SELECT COUNT(*) FROM notifications WHERE id=?",Integer.class,"trade-service:"+event));
   }
  }
 }

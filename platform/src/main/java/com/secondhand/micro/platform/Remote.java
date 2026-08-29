@@ -24,7 +24,11 @@ public class Remote {
    JsonNode result=request.retrieve().body(JsonNode.class);
    if(result==null||!result.path("success").asBoolean())throw new Failure(502,"BAD_GATEWAY","上游响应无效");
    return result.path("data");
-  }catch(RestClientResponseException e){throw new Failure(e.getStatusCode().value(),"UPSTREAM_ERROR","上游拒绝请求");}
+  }catch(RestClientResponseException e){
+   String code="UPSTREAM_ERROR",message="上游拒绝请求";
+   try{var error=json.readTree(e.getResponseBodyAsString()).path("error");code=error.path("code").asText(code);message=error.path("message").asText(message);}catch(Exception ignored){}
+   throw new Failure(e.getStatusCode().value(),code,message);
+  }
    catch(ResourceAccessException e){throw new Failure(503,"DEPENDENCY_UNAVAILABLE","依赖服务暂不可用");}
  }
 }

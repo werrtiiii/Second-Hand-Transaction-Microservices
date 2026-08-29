@@ -1,0 +1,22 @@
+# 示例占位值不是可用凭证。每个服务只持有自己的私钥及数据库密码。
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: service-public-config, namespace: secondhand-microservices}
+data:
+  USER_SERVICE_URL: http://user-service:8080
+  PRODUCT_SERVICE_URL: http://product-service:8080
+  TRADE_SERVICE_URL: http://trade-service:8080
+  USER_PUBLIC_KEY: REPLACE_WITH_USER_PUBLIC_KEY
+  PRODUCT_PUBLIC_KEY: REPLACE_WITH_PRODUCT_PUBLIC_KEY
+  TRADE_PUBLIC_KEY: REPLACE_WITH_TRADE_PUBLIC_KEY
+---
+apiVersion: v1
+kind: Secret
+metadata: {name: user-service-secrets, namespace: secondhand-microservices}
+type: Opaque
+stringData:
+  DB_PASSWORD: REPLACE_WITH_USER_DB_PASSWORD
+  SERVICE_PRIVATE_KEY: REPLACE_WITH_USER_PRIVATE_KEY
+# 另建 product-service-secrets、trade-service-secrets。
+# 每个 *-migration Secret 含 DB_HOST、DB_NAME、DB_USERNAME、DB_PASSWORD。
+# 迁移账号仅允许本服务库的 DDL/DML，不使用应用账号或跨库权限。

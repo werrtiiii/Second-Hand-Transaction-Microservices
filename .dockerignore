@@ -5,6 +5,10 @@
 .env.*
 !.env.example
 backend
-frontend
 docs
 部署交付材料_*
+
+**/dist
+**/uploads
+*.log
+reports

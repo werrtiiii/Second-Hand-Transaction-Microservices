@@ -10,6 +10,9 @@ x-app: &app
     TRADE_PUBLIC_KEY: ${TRADE_PUBLIC_KEY:?generate .env first}
     USER_SERVICE_URL: http://user-service:8080
     PRODUCT_SERVICE_URL: http://product-service:8080
+    TRADE_SERVICE_URL: http://trade-service:8080
+    APP_VERSION: ${APP_VERSION:-local-development}
+    UPLOAD_DIR: /app/uploads
 services:
   mysql:
     image: mysql:8.0
@@ -21,16 +24,18 @@ services:
     volumes:
       - microservice-data:/var/lib/mysql
       - ./db/microservices-init.sh:/docker-entrypoint-initdb.d/00-microservices.sh:ro
-      - ./db/user/V001__phase1.sql:/schemas/user.sql:ro
-      - ./db/product/V001__phase1.sql:/schemas/product.sql:ro
-      - ./db/trade/V001__phase1.sql:/schemas/trade.sql:ro
+      - ./db/user:/schemas/user:ro
+      - ./db/product:/schemas/product:ro
+      - ./db/trade:/schemas/trade:ro
     healthcheck:
       test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysqladmin ping -uroot --silent"]
       interval: 5s
       timeout: 3s
       retries: 30
   user-service:
+    image: ${IMAGE_PREFIX:-secondhand-microservices}/user-service:${APP_VERSION:-local-development}
     <<: *app
+    volumes: ["user-uploads:/app/uploads"]
     build:
       context: .
       dockerfile: services/user-service/Dockerfile
@@ -41,8 +46,13 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/secondhand_user?allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       DB_USERNAME: user_app
       DB_PASSWORD: ${USER_DB_PASSWORD}
+      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      ADMIN_BOOTSTRAP_IDENTIFIER: ${ADMIN_BOOTSTRAP_IDENTIFIER:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
   product-service:
+    image: ${IMAGE_PREFIX:-secondhand-microservices}/product-service:${APP_VERSION:-local-development}
     <<: *app
+    volumes: ["product-uploads:/app/uploads"]
     build:
       context: .
       dockerfile: services/product-service/Dockerfile
@@ -54,6 +64,7 @@ services:
       DB_USERNAME: product_app
       DB_PASSWORD: ${PRODUCT_DB_PASSWORD}
   trade-service:
+    image: ${IMAGE_PREFIX:-secondhand-microservices}/trade-service:${APP_VERSION:-local-development}
     <<: *app
     build:
       context: .
@@ -65,5 +76,16 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/secondhand_trade?allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       DB_USERNAME: trade_app
       DB_PASSWORD: ${TRADE_DB_PASSWORD}
+      MOCK_PAYMENTS_ENABLED: ${MOCK_PAYMENTS_ENABLED:-true}
+  gateway:
+    image: ${IMAGE_PREFIX:-secondhand-microservices}/gateway:${APP_VERSION:-local-development}
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports: ["127.0.0.1:18080:8080"]
+    depends_on: [user-service, product-service, trade-service]
+    restart: unless-stopped
 volumes:
   microservice-data:
+  user-uploads:
+  product-uploads:

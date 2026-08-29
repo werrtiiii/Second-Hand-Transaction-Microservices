@@ -1,10 +1,14 @@
-name: Microservices CI
+name: 微服务构建测试与部署
 on:
   push:
     branches: [master, "codex/**"]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: microservices-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -15,31 +19,107 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
-      - name: 三服务 API 与跨服务 MySQL 回归
-        run: mvn --batch-mode --no-transfer-progress clean verify
-      - name: 汇总结果并检查必需模块
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: 检查数据与源码归属边界
+        run: python3 scripts/check-service-boundaries.py
+      - name: 三服务 API、数据库隔离与七类端到端回归
+        run: |
+          set -o pipefail
+          mvn --batch-mode --no-transfer-progress clean verify 2>&1 | tee backend-verification.log
+      - name: 前端测试和生产构建
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test -- --reporter=default --reporter=junit --outputFile=../reports/frontend-junit.xml
+          npm run build
+      - name: 汇总并校验完整报告
         if: always()
         run: python3 scripts/summarize_microservice_tests.py
-      - name: 保存原始报告
+      - name: 保存原始报告和逐请求接口证据
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: microservices-phase1-test-reports
+          name: microservices-tests-${{ github.sha }}
+          retention-days: 30
           path: |
             services/*/target/failsafe-reports/
             tests/system-tests/target/failsafe-reports/
-            reports/phase1-test-report.md
+            tests/system-tests/target/api-coverage/
+            reports/frontend-junit.xml
+            reports/microservices-test-report.md
+            backend-verification.log
   images:
+    # 任一测试或报告完整性检查失败，本任务与部署均不执行。
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
+      fail-fast: false
       matrix:
-        service: [user, product, trade]
+        include:
+          - {service: user-service, file: services/user-service/Dockerfile}
+          - {service: product-service, file: services/product-service/Dockerfile}
+          - {service: trade-service, file: services/trade-service/Dockerfile}
+          - {service: gateway, file: gateway/Dockerfile}
     steps:
       - uses: actions/checkout@v6
+      - name: 计算小写镜像路径
+        id: names
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "prefix=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v7
         with:
           context: .
-          file: services/${{ matrix.service }}-service/Dockerfile
-          push: false
+          file: ${{ matrix.file }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.names.outputs.prefix }}/${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+  deploy:
+    needs: [verify, images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && vars.MICROSERVICES_DEPLOY_ENABLED == 'true'
+    environment: microservices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.34.3
+      - name: 配置专用集群凭证
+        env:
+          KUBECONFIG_BASE64: ${{ secrets.MICROSERVICES_KUBECONFIG_BASE64 }}
+        run: |
+          test -n "$KUBECONFIG_BASE64"
+          umask 077
+          printf '%s' "$KUBECONFIG_BASE64" | base64 --decode > "$RUNNER_TEMP/microservices-kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/microservices-kubeconfig" >> "$GITHUB_ENV"
+      - name: 迁移数据库并部署不可变版本
+        env:
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ github.sha }}
+        run: bash scripts/deploy-microservices.sh "ghcr.io/${REPOSITORY,,}" "$VERSION"
+      - name: 保存部署现场
+        if: always()
+        run: bash scripts/collect-microservice-diagnostics.sh reports/deployment/diagnostics
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: microservices-deployment-${{ github.sha }}
+          path: reports/deployment/
+      - name: 清理临时凭证
+        if: always()
+        run: rm -f "$RUNNER_TEMP/microservices-kubeconfig"

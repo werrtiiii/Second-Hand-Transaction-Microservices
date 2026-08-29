@@ -1,0 +1,1 @@
+CREATE TABLE outbox_events(id VARCHAR(64) PRIMARY KEY,recipient_id BIGINT NOT NULL,kind VARCHAR(32) NOT NULL,payload JSON NOT NULL,attempts INT NOT NULL DEFAULT 0,next_attempt_at DATETIME NOT NULL,lease_until DATETIME NULL,lease_owner VARCHAR(64),published_at DATETIME,last_error VARCHAR(200),created_at DATETIME NOT NULL,KEY ix_outbox_pending(published_at,next_attempt_at));

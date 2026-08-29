@@ -9,3 +9,16 @@ Thumbs.db
 *.log
 .env
 D:\Second-hand Transaction\frontend\src\__tests__\e2e
+# 各服务本地上传文件和测试图片不进入版本库
+**/uploads/
+
+.env.*
+!.env.example
+frontend/dist/
+reports/raw/
+reports/deployment/
+reports/local-runtime/
+*.tar
+
+__pycache__/
+交付材料/

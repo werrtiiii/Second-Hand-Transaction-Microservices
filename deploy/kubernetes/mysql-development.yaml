@@ -1,0 +1,36 @@
+# 仅供隔离开发环境；生产优先使用有备份和恢复演练的外部数据库。
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: mysql-data, namespace: secondhand-microservices}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 5Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: mysql, namespace: secondhand-microservices}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: mysql}}
+  template:
+    metadata: {labels: {app: mysql}}
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          envFrom: [{secretRef: {name: mysql-bootstrap}}]
+          ports: [{containerPort: 3306}]
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          readinessProbe: {exec: {command: [sh, -c, 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping -uroot --silent']}, periodSeconds: 5, initialDelaySeconds: 20}
+          volumeMounts: [{name: data, mountPath: /var/lib/mysql}]
+      volumes: [{name: data, persistentVolumeClaim: {claimName: mysql-data}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: mysql, namespace: secondhand-microservices}
+spec:
+  selector: {app: mysql}
+  ports: [{port: 3306, targetPort: 3306}]

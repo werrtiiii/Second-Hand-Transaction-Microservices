@@ -1,0 +1,199 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secondhand-microservices
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: user-uploads, namespace: secondhand-microservices}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: user-service, namespace: secondhand-microservices}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: user-service}}
+  template:
+    metadata: {labels: {app: user-service}}
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets: [{name: registry-credentials}]
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001}
+      containers:
+        - name: app
+          image: IMAGE_PREFIX/user-service:VERSION_TAG
+          ports: [{containerPort: 8080}]
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 768Mi}
+          startupProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, failureThreshold: 60, periodSeconds: 2}
+          livenessProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /actuator/health/readiness, port: 8080}, periodSeconds: 5}
+          envFrom:
+            - configMapRef: {name: service-public-config}
+            - secretRef: {name: user-service-secrets}
+          env:
+            - name: APP_VERSION
+              value: VERSION_TAG
+            - name: DB_USERNAME
+              value: user_app
+            - name: DB_URL
+              value: jdbc:mysql://mysql:3306/secondhand_user?allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            - name: UPLOAD_DIR
+              value: /app/uploads
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+      volumes:
+        - name: uploads
+          persistentVolumeClaim: {claimName: user-uploads}
+
+---
+apiVersion: v1
+kind: Service
+metadata: {name: user-service, namespace: secondhand-microservices}
+spec:
+  selector: {app: user-service}
+  ports: [{port: 8080, targetPort: 8080}]
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: product-uploads, namespace: secondhand-microservices}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: product-service, namespace: secondhand-microservices}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: product-service}}
+  template:
+    metadata: {labels: {app: product-service}}
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets: [{name: registry-credentials}]
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001}
+      containers:
+        - name: app
+          image: IMAGE_PREFIX/product-service:VERSION_TAG
+          ports: [{containerPort: 8080}]
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 768Mi}
+          startupProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, failureThreshold: 60, periodSeconds: 2}
+          livenessProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /actuator/health/readiness, port: 8080}, periodSeconds: 5}
+          envFrom:
+            - configMapRef: {name: service-public-config}
+            - secretRef: {name: product-service-secrets}
+          env:
+            - name: APP_VERSION
+              value: VERSION_TAG
+            - name: DB_USERNAME
+              value: product_app
+            - name: DB_URL
+              value: jdbc:mysql://mysql:3306/secondhand_product?allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            - name: UPLOAD_DIR
+              value: /app/uploads
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+      volumes:
+        - name: uploads
+          persistentVolumeClaim: {claimName: product-uploads}
+
+---
+apiVersion: v1
+kind: Service
+metadata: {name: product-service, namespace: secondhand-microservices}
+spec:
+  selector: {app: product-service}
+  ports: [{port: 8080, targetPort: 8080}]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: trade-service, namespace: secondhand-microservices}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: trade-service}}
+  template:
+    metadata: {labels: {app: trade-service}}
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets: [{name: registry-credentials}]
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001}
+      containers:
+        - name: app
+          image: IMAGE_PREFIX/trade-service:VERSION_TAG
+          ports: [{containerPort: 8080}]
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 768Mi}
+          startupProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, failureThreshold: 60, periodSeconds: 2}
+          livenessProbe: {httpGet: {path: /actuator/health/liveness, port: 8080}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /actuator/health/readiness, port: 8080}, periodSeconds: 5}
+          envFrom:
+            - configMapRef: {name: service-public-config}
+            - secretRef: {name: trade-service-secrets}
+          env:
+            - name: APP_VERSION
+              value: VERSION_TAG
+            - name: DB_USERNAME
+              value: trade_app
+            - name: DB_URL
+              value: jdbc:mysql://mysql:3306/secondhand_trade?allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            - name: UPLOAD_DIR
+              value: /app/uploads
+
+---
+apiVersion: v1
+kind: Service
+metadata: {name: trade-service, namespace: secondhand-microservices}
+spec:
+  selector: {app: trade-service}
+  ports: [{port: 8080, targetPort: 8080}]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: gateway, namespace: secondhand-microservices}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: gateway}}
+  template:
+    metadata: {labels: {app: gateway}}
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets: [{name: registry-credentials}]
+      containers:
+        - name: app
+          image: IMAGE_PREFIX/gateway:VERSION_TAG
+          ports: [{containerPort: 8080}]
+          env:
+            - name: DNS_RESOLVER
+              value: kube-dns.kube-system.svc.cluster.local
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: 500m, memory: 128Mi}
+          readinessProbe: {httpGet: {path: /healthz, port: 8080}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /healthz, port: 8080}, periodSeconds: 10}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: gateway, namespace: secondhand-microservices}
+spec:
+  selector: {app: gateway}
+  ports: [{port: 8080, targetPort: 8080}]

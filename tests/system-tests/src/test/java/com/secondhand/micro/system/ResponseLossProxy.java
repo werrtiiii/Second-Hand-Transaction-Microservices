@@ -4,7 +4,7 @@ import java.net.*;
 import java.net.http.*;
 import java.util.concurrent.*;
 class ResponseLossProxy implements AutoCloseable {
- final HttpServer server;final ExecutorService executor=Executors.newCachedThreadPool();volatile boolean dropReservationReplies;
+ final HttpServer server;final ExecutorService executor=Executors.newCachedThreadPool();volatile boolean dropReservationReplies;volatile boolean dropNotificationReplies;
  ResponseLossProxy(String target)throws Exception{
   server=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);server.setExecutor(executor);
   server.createContext("/",exchange->{
@@ -14,6 +14,7 @@ class ResponseLossProxy implements AutoCloseable {
     var response=HttpClient.newHttpClient().send(builder.build(),HttpResponse.BodyHandlers.ofByteArray());
     // 请求已由真实商品服务处理，仅丢弃响应，模拟结果未知。
     if(dropReservationReplies&&exchange.getRequestURI().getPath().equals("/internal/v1/inventory/reservations")&&exchange.getRequestMethod().equals("POST")){exchange.close();return;}
+    if(dropNotificationReplies&&exchange.getRequestURI().getPath().equals("/internal/v1/notifications")){exchange.close();return;}
     exchange.getResponseHeaders().set("Content-Type","application/json");
     exchange.sendResponseHeaders(response.statusCode(),response.body().length);exchange.getResponseBody().write(response.body());
    }catch(Exception e){try{exchange.sendResponseHeaders(502,-1);}catch(Exception ignored){}}

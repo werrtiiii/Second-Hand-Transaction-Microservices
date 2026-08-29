@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { api } from '../api.js'
 import { useRoute } from 'vue-router'
 import { toast } from '../toast.js'
@@ -65,9 +65,16 @@ async function saveReceiver() {
   finally { receiverSaving.value = false }
 }
 
+let recoveryPoll
+onUnmounted(() => clearTimeout(recoveryPoll))
 async function load() {
+  clearTimeout(recoveryPoll)
   loading.value = true; error.value = ''
-  try { detail.value = await api(`/api/orders/${route.params.id}`) }
+  try {
+    detail.value = await api(`/api/orders/${route.params.id}`)
+    // 预占结果未知时只轮询同一订单，不重新下单。
+    if (detail.value?.order?.status === 'CREATING') recoveryPoll = setTimeout(load, 1500)
+  }
   catch (e) { error.value = e.message || '加载失败' }
   finally { loading.value = false }
 }
@@ -348,7 +355,7 @@ async function submitRating() {
 
 function statusLabel(s) {
   const map = {
-    WAIT_PAY: '待支付', WAIT_DELIVER: '待发货', WAIT_RECEIVE: '待收货',
+    CREATING: '订单创建中，正在确认库存', CREATE_FAILED: '创建失败', WAIT_PAY: '待支付', WAIT_DELIVER: '待发货', WAIT_RECEIVE: '待收货',
     COMPLETED: '已完成（资金托管中）', SETTLED: '已结算', CANCELLED: '已取消', AFTER_SALE: '售后中'
   }
   return map[s] || s

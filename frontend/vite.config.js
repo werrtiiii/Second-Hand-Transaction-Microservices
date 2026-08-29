@@ -9,11 +9,11 @@ export default defineConfig({
     allowedHosts: ['.cpolar.top', '.cpolar.cn', '.cpolar.cc'],
     proxy: {
       '/api': {
-        target: 'http://localhost:8088',
+        target: 'http://localhost:18080',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:8088',
+        target: 'http://localhost:18080',
         changeOrigin: true,
       },
     },

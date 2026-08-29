@@ -13,7 +13,9 @@ public class UserController {
  public record Credentials(@NotBlank @Pattern(regexp="PHONE|EMAIL") String identityType,@NotBlank @Size(max=128) String identifier,@NotBlank @Size(min=6,max=64) String password){}
  public record Introspection(@NotBlank String token){}
  public record Batch(@NotNull @Size(max=100) List<@NotNull @Positive Long> userIds){}
+ @com.secondhand.common.ratelimit.RateLimit(maxRequests=10)
  @PostMapping("/api/auth/register") ResponseEntity<?> register(@Valid @RequestBody Credentials r){return ResponseEntity.status(201).body(Api.ok(users.register(r.identityType(),r.identifier(),r.password())));}
+ @com.secondhand.common.ratelimit.RateLimit(maxRequests=20)
  @PostMapping("/api/auth/login") Api<?> login(@Valid @RequestBody Credentials r){return Api.ok(users.login(r.identityType(),r.identifier(),r.password()));}
  @GetMapping("/api/auth/me") Api<?> me(@RequestHeader(value="Authorization",required=false) String auth){return Api.ok(users.me(auth));}
  @PostMapping("/internal/v1/auth/introspect") Api<?> inspect(HttpServletRequest req,@Valid @RequestBody Introspection r){InternalGuard.require(req,"product-service","trade-service");return Api.ok(users.introspect(r.token()));}

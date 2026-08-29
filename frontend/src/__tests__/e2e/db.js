@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise'
 
 /**
  * 直连 browser-e2e profile 对应的 MySQL 库（secondhand_e2e），用于落库断言。
- * 连接参数与 backend/src/main/resources/application-browser-e2e.yml 保持一致，
+ * 连接参数与本地微服务 Compose 的测试数据库配置保持一致，
  * 均可通过 E2E_DB_* 环境变量覆盖。
  */
 const config = {

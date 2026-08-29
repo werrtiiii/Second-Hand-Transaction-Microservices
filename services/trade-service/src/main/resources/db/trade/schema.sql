@@ -100,3 +100,14 @@ CREATE TABLE `ratings` (
 
 ALTER TABLE orders MODIFY status ENUM('CREATING','CREATE_FAILED','AFTER_SALE','CANCELLED','COMPLETED','SETTLED','WAIT_DELIVER','WAIT_PAY','WAIT_RECEIVE') NOT NULL, ADD COLUMN product_title VARCHAR(100), ADD COLUMN product_version BIGINT;
 CREATE TABLE trade_operations(id BIGINT PRIMARY KEY AUTO_INCREMENT,actor_id BIGINT NOT NULL,idempotency_key VARCHAR(80) NOT NULL,payload_hash CHAR(64) NOT NULL,order_id BIGINT,phase VARCHAR(32) NOT NULL,attempts INT NOT NULL DEFAULT 0,last_error VARCHAR(80),created_at DATETIME NOT NULL,updated_at DATETIME NOT NULL,UNIQUE KEY uk_actor_key(actor_id,idempotency_key),UNIQUE KEY uk_order(order_id));
+
+CREATE TABLE outbox_events(id VARCHAR(64) PRIMARY KEY,recipient_id BIGINT NOT NULL,kind VARCHAR(32) NOT NULL,payload JSON NOT NULL,attempts INT NOT NULL DEFAULT 0,next_attempt_at DATETIME NOT NULL,lease_until DATETIME NULL,lease_owner VARCHAR(64),published_at DATETIME,last_error VARCHAR(200),created_at DATETIME NOT NULL,KEY ix_outbox_pending(published_at,next_attempt_at));
+
+ALTER TABLE orders ADD COLUMN list_price_cent INT, ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE offers MODIFY status ENUM('ACCEPTED','ACCEPTING','CANCELLED','PENDING','REJECTED') NOT NULL, ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE after_sale_requests ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE shipments ADD UNIQUE KEY uk_shipment_order(order_id);
+CREATE TABLE payments(payment_no VARCHAR(64) PRIMARY KEY,order_id BIGINT NOT NULL UNIQUE,buyer_id BIGINT NOT NULL,amount_cent INT NOT NULL,status VARCHAR(20) NOT NULL,refunded_cent INT NOT NULL DEFAULT 0,method VARCHAR(20),created_at DATETIME NOT NULL,updated_at DATETIME NOT NULL);
+CREATE TABLE refunds(refund_no VARCHAR(64) PRIMARY KEY,after_sale_id BIGINT NOT NULL UNIQUE,order_id BIGINT NOT NULL,amount_cent INT NOT NULL,created_at DATETIME NOT NULL);
+
+ALTER TABLE trade_operations ADD COLUMN next_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ADD COLUMN lease_until DATETIME, ADD COLUMN lease_owner VARCHAR(64), ADD KEY ix_recovery(phase,next_attempt_at);

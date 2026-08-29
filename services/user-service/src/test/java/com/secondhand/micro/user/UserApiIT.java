@@ -35,4 +35,13 @@ class UserApiIT {
   assertEquals(400,Http.call(url,"POST","/api/auth/register",credentials("not-an-email"),null,null).status());
   assertEquals(401,Http.call(url,"POST","/internal/v1/users/batch",Map.of("userIds",java.util.List.of(1)),null,null).status());
  }
+ @Test void loginRateLimitRejectsExcessRequests(){
+  // 独立实例启用默认安全限制，避免批量业务数据准备消耗此窗口。
+  var limited=env.start("user",UserApplication.class,Map.of("app.rate-limit-enabled","true"));
+  try{String endpoint=TestEnvironment.http(limited);
+   for(int i=0;i<20;i++)assertEquals(401,Http.call(endpoint,"POST","/api/auth/login",credentials("missing@example.com"),null,null).status());
+   var rejected=Http.call(endpoint,"POST","/api/auth/login",credentials("missing@example.com"),null,null);
+   assertEquals(429,rejected.status());assertEquals("RATE_LIMITED",rejected.body().path("error").path("code").asText());
+  }finally{limited.close();}
+ }
 }
