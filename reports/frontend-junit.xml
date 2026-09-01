@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="25" failures="0" errors="0" time="0.0877511">
-    <testsuite name="src/__tests__/api.test.js" timestamp="2026-08-28T09:16:24.796Z" hostname="werrt" tests="8" failures="0" errors="0" skipped="0" time="0.0095783">
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 自动注入 JWT Authorization 头" time="0.0024143">
+<testsuites name="vitest tests" tests="25" failures="0" errors="0" time="0.0859636">
+    <testsuite name="src/__tests__/api.test.js" timestamp="2026-09-01T13:07:09.385Z" hostname="LCY-R7000" tests="8" failures="0" errors="0" skipped="0" time="0.0066222">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 自动注入 JWT Authorization 头" time="0.0019628">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 无 token 时不注入 Authorization 头" time="0.0003412">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 无 token 时不注入 Authorization 头" time="0.0002487">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; auth=false 时即使有 token 也不注入" time="0.0004701">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; auth=false 时即使有 token 也不注入" time="0.0003263">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 成功时解包返回 data" time="0.0008953">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; 成功时解包返回 data" time="0.0007957">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; success=false 时抛出后端错误信息" time="0.0019597">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; success=false 时抛出后端错误信息" time="0.0010319">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; body 对象自动 JSON 序列化" time="0.0004177">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; body 对象自动 JSON 序列化" time="0.0002206">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; raw 模式不设置 Content-Type 且 body 原样传递" time="0.0005637">
+        <testcase classname="src/__tests__/api.test.js" name="api 请求封装 &gt; raw 模式不设置 Content-Type 且 body 原样传递" time="0.0002945">
         </testcase>
-        <testcase classname="src/__tests__/api.test.js" name="微服务下单幂等键 &gt; 网络结果未知时重试复用同一个键" time="0.0010224">
-        </testcase>
-    </testsuite>
-    <testsuite name="src/__tests__/AppIcon.test.js" timestamp="2026-08-28T09:16:24.798Z" hostname="werrt" tests="5" failures="0" errors="0" skipped="0" time="0.0587242">
-        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should render all icon names without error" time="0.0524974">
-        </testcase>
-        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should apply active class when active prop is true" time="0.0014129">
-        </testcase>
-        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should not have active class by default" time="0.0008656">
-        </testcase>
-        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should use custom size prop" time="0.0015133">
-        </testcase>
-        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should default to size 20" time="0.0010594">
+        <testcase classname="src/__tests__/api.test.js" name="微服务下单幂等键 &gt; 网络结果未知时重试复用同一个键" time="0.0006199">
         </testcase>
     </testsuite>
-    <testsuite name="src/__tests__/notificationStore.test.js" timestamp="2026-08-28T09:16:24.799Z" hostname="werrt" tests="5" failures="0" errors="0" skipped="0" time="0.0080067">
-        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; fetch 设置各计数" time="0.0039545">
+    <testsuite name="src/__tests__/AppIcon.test.js" timestamp="2026-09-01T13:07:09.388Z" hostname="LCY-R7000" tests="5" failures="0" errors="0" skipped="0" time="0.062122">
+        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should render all icon names without error" time="0.0561026">
         </testcase>
-        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; fetch 接口异常时计数保持不变" time="0.0006744">
+        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should apply active class when active prop is true" time="0.0015737">
         </testcase>
-        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; pendingTotal 为各待处理订单之和" time="0.0006126">
+        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should not have active class by default" time="0.000868">
         </testcase>
-        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; startPolling 立即拉取并按间隔轮询" time="0.0012087">
+        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should use custom size prop" time="0.0014781">
         </testcase>
-        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; stopPolling 停止轮询" time="0.0004533">
-        </testcase>
-    </testsuite>
-    <testsuite name="src/__tests__/toast.test.js" timestamp="2026-08-28T09:16:24.800Z" hostname="werrt" tests="2" failures="0" errors="0" skipped="0" time="0.0045153">
-        <testcase classname="src/__tests__/toast.test.js" name="toast &gt; show 调用注册的回调" time="0.0024493">
-        </testcase>
-        <testcase classname="src/__tests__/toast.test.js" name="toast &gt; success/error/warn 传递对应类型" time="0.0004121">
+        <testcase classname="src/__tests__/AppIcon.test.js" name="AppIcon &gt; should default to size 20" time="0.0008944">
         </testcase>
     </testsuite>
-    <testsuite name="src/__tests__/userStore.test.js" timestamp="2026-08-28T09:16:24.800Z" hostname="werrt" tests="5" failures="0" errors="0" skipped="0" time="0.0069266">
-        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; setAuth 写入状态与 localStorage" time="0.0034826">
+    <testsuite name="src/__tests__/notificationStore.test.js" timestamp="2026-09-01T13:07:09.389Z" hostname="LCY-R7000" tests="5" failures="0" errors="0" skipped="0" time="0.0070035">
+        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; fetch 设置各计数" time="0.0035116">
         </testcase>
-        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; clearAuth 清空状态与 localStorage" time="0.000791">
+        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; fetch 接口异常时计数保持不变" time="0.0005694">
         </testcase>
-        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; fetchProfile 成功时更新昵称等信息" time="0.0006271">
+        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; pendingTotal 为各待处理订单之和" time="0.0005496">
         </testcase>
-        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; fetchProfile 失败时清除登录态" time="0.0004268">
+        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; startPolling 立即拉取并按间隔轮询" time="0.0010885">
         </testcase>
-        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; 无 token 时 fetchProfile 直接返回不请求接口" time="0.0005102">
+        <testcase classname="src/__tests__/notificationStore.test.js" name="notification store &gt; stopPolling 停止轮询" time="0.0003952">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/toast.test.js" timestamp="2026-09-01T13:07:09.390Z" hostname="LCY-R7000" tests="2" failures="0" errors="0" skipped="0" time="0.0032951">
+        <testcase classname="src/__tests__/toast.test.js" name="toast &gt; show 调用注册的回调" time="0.0019444">
+        </testcase>
+        <testcase classname="src/__tests__/toast.test.js" name="toast &gt; success/error/warn 传递对应类型" time="0.0003111">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/userStore.test.js" timestamp="2026-09-01T13:07:09.391Z" hostname="LCY-R7000" tests="5" failures="0" errors="0" skipped="0" time="0.0069208">
+        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; setAuth 写入状态与 localStorage" time="0.0038357">
+        </testcase>
+        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; clearAuth 清空状态与 localStorage" time="0.0006627">
+        </testcase>
+        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; fetchProfile 成功时更新昵称等信息" time="0.0005695">
+        </testcase>
+        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; fetchProfile 失败时清除登录态" time="0.0004127">
+        </testcase>
+        <testcase classname="src/__tests__/userStore.test.js" name="user store &gt; 无 token 时 fetchProfile 直接返回不请求接口" time="0.0004531">
         </testcase>
     </testsuite>
 </testsuites>
