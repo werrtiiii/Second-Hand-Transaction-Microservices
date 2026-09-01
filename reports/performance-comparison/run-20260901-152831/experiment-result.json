@@ -1,0 +1,272 @@
+{
+  "status": "COMPLETED",
+  "generatedAt": "2026-09-01T15:37:00.556369+08:00",
+  "conditions": {
+    "machine": "Windows-11-10.0.22631-SP0",
+    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "logicalCpuCount": 16,
+    "concurrency": 50,
+    "durationPerRunSeconds": 45,
+    "runsPerVariant": 3,
+    "warmup": "10 VU / 10 seconds before each run",
+    "endpoints": [
+      "/api/products?page=0&size=20",
+      "/api/regions",
+      "/api/users/2/rating"
+    ],
+    "applicationMemoryScope": {
+      "monolith": "one Java backend process",
+      "microservices": "three Java service processes plus Node gateway; frontend excluded"
+    },
+    "database": "same local MySQL instance; source and split schemas have equal row counts"
+  },
+  "dataCounts": {
+    "users": {
+      "monolith": 3,
+      "microservices": 3
+    },
+    "user_identities": {
+      "monolith": 3,
+      "microservices": 3
+    },
+    "user_addresses": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "chat_messages": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "categories": {
+      "monolith": 23,
+      "microservices": 23
+    },
+    "products": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "product_images": {
+      "monolith": 1,
+      "microservices": 1
+    },
+    "comments": {
+      "monolith": 1,
+      "microservices": 1
+    },
+    "favorites": {
+      "monolith": 0,
+      "microservices": 0
+    },
+    "reports": {
+      "monolith": 0,
+      "microservices": 0
+    },
+    "orders": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "order_events": {
+      "monolith": 8,
+      "microservices": 8
+    },
+    "offers": {
+      "monolith": 0,
+      "microservices": 0
+    },
+    "shipments": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "after_sale_requests": {
+      "monolith": 2,
+      "microservices": 2
+    },
+    "ratings": {
+      "monolith": 1,
+      "microservices": 1
+    }
+  },
+  "runs": [
+    {
+      "variant": "monolith",
+      "run": 1,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 51001,
+      "throughputRps": 1020.0386922702381,
+      "averageResponseMs": 38.933148679751376,
+      "p95ResponseMs": 107.581741,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 18.316211538461538,
+      "peakCpuCorePercent": 151.454,
+      "averageWorkingSetMiB": 433.6684615384615,
+      "peakWorkingSetMiB": 489.0,
+      "sampleCount": 52
+    },
+    {
+      "variant": "microservices",
+      "run": 1,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 49447,
+      "throughputRps": 1097.733695658163,
+      "averageResponseMs": 40.76396743169513,
+      "p95ResponseMs": 115.68225419999997,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 84.66782978723404,
+      "peakCpuCorePercent": 652.248,
+      "averageWorkingSetMiB": 1254.636170212766,
+      "peakWorkingSetMiB": 1331.859,
+      "sampleCount": 47
+    },
+    {
+      "variant": "microservices",
+      "run": 2,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 50132,
+      "throughputRps": 1112.8635169088657,
+      "averageResponseMs": 40.27244223651541,
+      "p95ResponseMs": 114.24173585,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 86.63770212765958,
+      "peakCpuCorePercent": 516.868,
+      "averageWorkingSetMiB": 1253.9432127659575,
+      "peakWorkingSetMiB": 1337.648,
+      "sampleCount": 47
+    },
+    {
+      "variant": "monolith",
+      "run": 2,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 49158,
+      "throughputRps": 1091.3791413162676,
+      "averageResponseMs": 40.91379355250414,
+      "p95ResponseMs": 113.146894,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 21.666395833333336,
+      "peakCpuCorePercent": 170.224,
+      "averageWorkingSetMiB": 477.68322916666665,
+      "peakWorkingSetMiB": 495.316,
+      "sampleCount": 48
+    },
+    {
+      "variant": "monolith",
+      "run": 3,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 50836,
+      "throughputRps": 1128.646282798491,
+      "averageResponseMs": 37.01456466195212,
+      "p95ResponseMs": 104.72445775,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 18.721791666666665,
+      "peakCpuCorePercent": 93.7,
+      "averageWorkingSetMiB": 477.6595208333333,
+      "peakWorkingSetMiB": 493.25,
+      "sampleCount": 48
+    },
+    {
+      "variant": "microservices",
+      "run": 3,
+      "concurrency": 50,
+      "durationSeconds": 45,
+      "requests": 50211,
+      "throughputRps": 1114.3645938756893,
+      "averageResponseMs": 40.22656843599985,
+      "p95ResponseMs": 116.23614,
+      "errorRatePercent": 0,
+      "checkRatePercent": 100,
+      "averageCpuCorePercent": 63.006750000000004,
+      "peakCpuCorePercent": 571.415,
+      "averageWorkingSetMiB": 1300.9762291666666,
+      "peakWorkingSetMiB": 1406.227,
+      "sampleCount": 48
+    }
+  ],
+  "summary": {
+    "monolith": {
+      "requests": {
+        "mean": 50331.666666666664,
+        "sampleStdDev": 1019.7677840240558
+      },
+      "throughputRps": {
+        "mean": 1080.0213721283324,
+        "sampleStdDev": 55.18742040341233
+      },
+      "averageResponseMs": {
+        "mean": 38.95383563140255,
+        "sampleStdDev": 1.9496967578845028
+      },
+      "p95ResponseMs": {
+        "mean": 108.48436425,
+        "sampleStdDev": 4.283153586425422
+      },
+      "errorRatePercent": {
+        "mean": 0.0,
+        "sampleStdDev": 0.0
+      },
+      "averageCpuCorePercent": {
+        "mean": 19.568133012820514,
+        "sampleStdDev": 1.82842936917414
+      },
+      "peakCpuCorePercent": {
+        "mean": 138.45933333333332,
+        "sampleStdDev": 39.88266121177639
+      },
+      "averageWorkingSetMiB": {
+        "mean": 463.00373717948713,
+        "sampleStdDev": 25.40509669775895
+      },
+      "peakWorkingSetMiB": {
+        "mean": 492.522,
+        "sampleStdDev": 3.2203186177768073
+      }
+    },
+    "microservices": {
+      "requests": {
+        "mean": 49930.0,
+        "sampleStdDev": 420.1511632734104
+      },
+      "throughputRps": {
+        "mean": 1108.3206021475726,
+        "sampleStdDev": 9.199198322501255
+      },
+      "averageResponseMs": {
+        "mean": 40.42099270140346,
+        "sampleStdDev": 0.2979091314602755
+      },
+      "p95ResponseMs": {
+        "mean": 115.38671001666665,
+        "sampleStdDev": 1.0295250126203495
+      },
+      "errorRatePercent": {
+        "mean": 0.0,
+        "sampleStdDev": 0.0
+      },
+      "averageCpuCorePercent": {
+        "mean": 78.1040939716312,
+        "sampleStdDev": 13.111729310342904
+      },
+      "peakCpuCorePercent": {
+        "mean": 580.177,
+        "sampleStdDev": 68.11398962768222
+      },
+      "averageWorkingSetMiB": {
+        "mean": 1269.85187071513,
+        "sampleStdDev": 26.956711859397345
+      },
+      "peakWorkingSetMiB": {
+        "mean": 1358.578,
+        "sampleStdDev": 41.3666354807834
+      }
+    }
+  },
+  "summaryExportFormat": "k6 direct metric values; corrected from raw summary files"
+}

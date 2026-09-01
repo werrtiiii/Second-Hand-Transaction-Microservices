@@ -1,0 +1,66 @@
+{
+  "users": {
+    "monolith": 3,
+    "microservices": 3
+  },
+  "user_identities": {
+    "monolith": 3,
+    "microservices": 3
+  },
+  "user_addresses": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "chat_messages": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "categories": {
+    "monolith": 23,
+    "microservices": 23
+  },
+  "products": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "product_images": {
+    "monolith": 1,
+    "microservices": 1
+  },
+  "comments": {
+    "monolith": 1,
+    "microservices": 1
+  },
+  "favorites": {
+    "monolith": 0,
+    "microservices": 0
+  },
+  "reports": {
+    "monolith": 0,
+    "microservices": 0
+  },
+  "orders": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "order_events": {
+    "monolith": 8,
+    "microservices": 8
+  },
+  "offers": {
+    "monolith": 0,
+    "microservices": 0
+  },
+  "shipments": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "after_sale_requests": {
+    "monolith": 2,
+    "microservices": 2
+  },
+  "ratings": {
+    "monolith": 1,
+    "microservices": 1
+  }
+}

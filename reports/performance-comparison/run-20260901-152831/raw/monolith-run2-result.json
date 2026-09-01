@@ -1,0 +1,17 @@
+{
+  "variant": "monolith",
+  "run": 2,
+  "concurrency": 50,
+  "durationSeconds": 45,
+  "requests": 49158,
+  "throughputRps": 1091.3791413162676,
+  "averageResponseMs": 40.91379355250414,
+  "p95ResponseMs": 113.146894,
+  "errorRatePercent": 0,
+  "checkRatePercent": 0,
+  "averageCpuCorePercent": 21.666395833333336,
+  "peakCpuCorePercent": 170.224,
+  "averageWorkingSetMiB": 477.68322916666665,
+  "peakWorkingSetMiB": 495.316,
+  "sampleCount": 48
+}

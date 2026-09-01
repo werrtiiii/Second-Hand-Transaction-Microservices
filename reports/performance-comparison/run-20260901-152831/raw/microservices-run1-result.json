@@ -1,0 +1,17 @@
+{
+  "variant": "microservices",
+  "run": 1,
+  "concurrency": 50,
+  "durationSeconds": 45,
+  "requests": 49447,
+  "throughputRps": 1097.733695658163,
+  "averageResponseMs": 40.76396743169513,
+  "p95ResponseMs": 115.68225419999997,
+  "errorRatePercent": 0,
+  "checkRatePercent": 0,
+  "averageCpuCorePercent": 84.66782978723404,
+  "peakCpuCorePercent": 652.248,
+  "averageWorkingSetMiB": 1254.636170212766,
+  "peakWorkingSetMiB": 1331.859,
+  "sampleCount": 47
+}

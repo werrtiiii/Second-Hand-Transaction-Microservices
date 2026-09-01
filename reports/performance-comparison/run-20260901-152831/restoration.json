@@ -1,0 +1,6 @@
+{
+  "monolithStopped": true,
+  "microservicesStartAttempted": true,
+  "temporaryDatabaseDropped": true,
+  "mysqlKeptRunning": true
+}
