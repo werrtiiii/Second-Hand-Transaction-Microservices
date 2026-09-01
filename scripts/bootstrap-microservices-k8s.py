@@ -26,6 +26,6 @@ for s in ['user','product','trade']:
 create('Secret','mysql-bootstrap',bootstrap)
 run('kubectl','apply','-f',str(root/'deploy/kubernetes/mysql-development.yaml'))
 run('kubectl','-n',namespace,'rollout','status','deployment/mysql','--timeout=180s')
-script=(root/'db/kubernetes-bootstrap.sh').read_text()
+script=(root/'db/kubernetes-bootstrap.sh').read_text(encoding='utf8')
 run('kubectl','-n',namespace,'exec','-i','deployment/mysql','--','bash','-s',data=script)
 print('Created isolated development databases and service credentials; no application images deployed')

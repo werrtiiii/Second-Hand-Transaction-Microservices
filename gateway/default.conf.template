@@ -95,6 +95,12 @@ map $uri $service_upstream {
     ~^/api/products/[^/]+/images/[^/]+/cover$ product-service:8080;
     ~^/api/products/[^/]+/images/[^/]+$ product-service:8080;
 }
+map $service_upstream $resolved_service_upstream {
+    default $service_upstream;
+    "user-service:8080" "user-service${SERVICE_DNS_SUFFIX}:8080";
+    "product-service:8080" "product-service${SERVICE_DNS_SUFFIX}:8080";
+    "trade-service:8080" "trade-service${SERVICE_DNS_SUFFIX}:8080";
+}
 server {
     listen 8080;
     server_tokens off;
@@ -104,16 +110,24 @@ server {
     location = /healthz { access_log off; return 200 'ok'; }
     location /internal/ { return 404; }
     location /actuator/ { return 404; }
+    error_page 502 503 504 = @dependency_unavailable;
+    location @dependency_unavailable {
+        internal;
+        default_type application/json;
+        charset utf-8;
+        add_header Retry-After 5 always;
+        return 503 '{"success":false,"code":"DEPENDENCY_UNAVAILABLE","message":"依赖服务暂时不可用，请稍后重试"}';
+    }
     location /api/ {
         if ($service_upstream = "") { return 404; }
-        proxy_pass http://$service_upstream;
+        proxy_pass http://$resolved_service_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $remote_addr;
         proxy_connect_timeout 3s;
         proxy_read_timeout 30s;
     }
-    location /uploads/avatars/ { set $uploads_user user-service:8080; proxy_pass http://$uploads_user; }
-    location /uploads/products/ { set $uploads_product product-service:8080; proxy_pass http://$uploads_product; }
+    location /uploads/avatars/ { set $uploads_user user-service${SERVICE_DNS_SUFFIX}:8080; proxy_pass http://$uploads_user; }
+    location /uploads/products/ { set $uploads_product product-service${SERVICE_DNS_SUFFIX}:8080; proxy_pass http://$uploads_product; }
     location / { try_files $uri $uri/ /index.html; }
 }
