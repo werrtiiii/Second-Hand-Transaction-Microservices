@@ -1,0 +1,9 @@
+﻿docker :  Image secondhand-microservices/product-service:dev-002 Building 
+所在位置 行:1 字符: 31
++ ...  "dev-002"; docker compose -f compose.microservices.yml build product ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( Image secondha...v-002 Building :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+open C:\Users\Suzchg\.docker\buildx\.lock: Access is denied.
+
