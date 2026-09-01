@@ -9,6 +9,8 @@ Thumbs.db
 *.log
 .env
 D:\Second-hand Transaction\frontend\src\__tests__\e2e
+.arts
+.codeartsdoer
 # 各服务本地上传文件和测试图片不进入版本库
 **/uploads/
 
