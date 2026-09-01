@@ -185,11 +185,21 @@ spec:
           env:
             - name: DNS_RESOLVER
               value: kube-dns.kube-system.svc.cluster.local
+            - name: SERVICE_DNS_SUFFIX
+              value: .secondhand-microservices.svc.cluster.local
           resources:
             requests: {cpu: 50m, memory: 32Mi}
             limits: {cpu: 500m, memory: 128Mi}
           readinessProbe: {httpGet: {path: /healthz, port: 8080}, periodSeconds: 5}
           livenessProbe: {httpGet: {path: /healthz, port: 8080}, periodSeconds: 10}
+          volumeMounts:
+            - name: gateway-nginx-template
+              mountPath: /etc/nginx/templates/default.conf.template
+              subPath: default.conf.template
+              readOnly: true
+      volumes:
+        - name: gateway-nginx-template
+          configMap: {name: gateway-nginx-template}
 ---
 apiVersion: v1
 kind: Service
