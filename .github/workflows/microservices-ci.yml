@@ -126,12 +126,14 @@ jobs:
           kubectl cluster-info
           kubectl get namespace secondhand-microservices
       - name: 迁移数据库并部署不可变版本
+        shell: bash
         env:
           REPOSITORY: ${{ github.repository }}
           VERSION: ${{ github.sha }}
         run: bash scripts/deploy-microservices.sh "ghcr.io/${REPOSITORY,,}" "$VERSION"
       - name: 保存部署现场
         if: always()
+        shell: bash
         run: bash scripts/collect-microservice-diagnostics.sh reports/deployment/diagnostics
       - uses: actions/upload-artifact@v4
         if: always()
