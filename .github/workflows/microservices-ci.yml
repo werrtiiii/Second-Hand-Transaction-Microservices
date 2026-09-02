@@ -97,9 +97,12 @@ jobs:
     runs-on: [self-hosted, Windows, X64, secondhand-k8s]
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
+      - name: 验证本机 Python
+        shell: pwsh
+        run: |
+          $python = Get-Command python -ErrorAction Stop
+          Write-Host "使用本机 Python：$($python.Source)"
+          python --version
       - name: 验证本机 kubectl
         shell: pwsh
         run: |
