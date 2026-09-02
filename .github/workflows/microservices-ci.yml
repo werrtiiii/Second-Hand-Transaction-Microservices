@@ -100,9 +100,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - uses: azure/setup-kubectl@v4
-        with:
-          version: v1.34.3
+      - name: 验证本机 kubectl
+        shell: pwsh
+        run: |
+          $kubectl = Get-Command kubectl -ErrorAction Stop
+          Write-Host "使用本机 kubectl：$($kubectl.Source)"
+          kubectl version --client
       - name: 配置 Git Bash
         shell: pwsh
         run: |
