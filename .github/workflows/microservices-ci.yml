@@ -98,19 +98,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: 验证本机 Python
-        shell: pwsh
+        shell: powershell
         run: |
           $python = Get-Command python -ErrorAction Stop
           Write-Host "使用本机 Python：$($python.Source)"
           python --version
       - name: 验证本机 kubectl
-        shell: pwsh
+        shell: powershell
         run: |
           $kubectl = Get-Command kubectl -ErrorAction Stop
           Write-Host "使用本机 kubectl：$($kubectl.Source)"
           kubectl version --client
       - name: 配置 Git Bash
-        shell: pwsh
+        shell: powershell
         run: |
           $gitCommand = Get-Command git -ErrorAction Stop
           $gitRoot = Split-Path (Split-Path $gitCommand.Source -Parent) -Parent
@@ -120,7 +120,7 @@ jobs:
           }
           $bashDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: 验证现场 Kubernetes 集群
-        shell: pwsh
+        shell: powershell
         run: |
           kubectl config current-context
           kubectl cluster-info
