@@ -39,7 +39,7 @@ YAML
   kubectl -n "$namespace" logs "job/$job" > "$root/reports/deployment/$service-migration.log"
 done
 kubectl -n "$namespace" create configmap gateway-nginx-template --from-file="default.conf.template=$root/gateway/default.conf.template" --dry-run=client -o yaml | kubectl apply -f -
-python3 - "$root/deploy/kubernetes/services.yaml" "$prefix" "$version" <<'PY' | kubectl apply -f -
+python - "$root/deploy/kubernetes/services.yaml" "$prefix" "$version" <<'PY' | kubectl apply -f -
 import sys
 from pathlib import Path
 print(Path(sys.argv[1]).read_text().replace('IMAGE_PREFIX',sys.argv[2]).replace('VERSION_TAG',sys.argv[3]))

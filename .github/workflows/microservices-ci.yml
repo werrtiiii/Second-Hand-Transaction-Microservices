@@ -93,20 +93,32 @@ jobs:
     needs: [verify, images]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && vars.MICROSERVICES_DEPLOY_ENABLED == 'true'
     environment: microservices
-    runs-on: ubuntu-latest
+    # 部署必须在能直接访问现场 Docker Desktop Kubernetes 的专用 Runner 上运行。
+    runs-on: [self-hosted, Windows, X64, secondhand-k8s]
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
       - uses: azure/setup-kubectl@v4
         with:
           version: v1.34.3
-      - name: 配置专用集群凭证
-        env:
-          KUBECONFIG_BASE64: ${{ secrets.MICROSERVICES_KUBECONFIG_BASE64 }}
+      - name: 配置 Git Bash
+        shell: pwsh
         run: |
-          test -n "$KUBECONFIG_BASE64"
-          umask 077
-          printf '%s' "$KUBECONFIG_BASE64" | base64 --decode > "$RUNNER_TEMP/microservices-kubeconfig"
-          echo "KUBECONFIG=$RUNNER_TEMP/microservices-kubeconfig" >> "$GITHUB_ENV"
+          $gitCommand = Get-Command git -ErrorAction Stop
+          $gitRoot = Split-Path (Split-Path $gitCommand.Source -Parent) -Parent
+          $bashDirectory = Join-Path $gitRoot "bin"
+          if (-not (Test-Path (Join-Path $bashDirectory "bash.exe"))) {
+            throw "没有找到 Git for Windows Bash：$bashDirectory"
+          }
+          $bashDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: 验证现场 Kubernetes 集群
+        shell: pwsh
+        run: |
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get namespace secondhand-microservices
       - name: 迁移数据库并部署不可变版本
         env:
           REPOSITORY: ${{ github.repository }}
@@ -120,6 +132,3 @@ jobs:
         with:
           name: microservices-deployment-${{ github.sha }}
           path: reports/deployment/
-      - name: 清理临时凭证
-        if: always()
-        run: rm -f "$RUNNER_TEMP/microservices-kubeconfig"
